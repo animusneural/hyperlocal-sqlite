@@ -1,0 +1,75 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  slug   String  @unique
+  name   String
+  venues Venue[]
+}
+
+enum PriceLevel {
+  LOW
+  MID
+  HIGH
+}
+
+model Venue {
+  id          Int          @id @default(autoincrement())
+  slug        String       @unique
+  name        String
+  description String
+  address     String
+  lat         Float
+  lng         Float
+  priceLevel  PriceLevel
+  website     String?
+  phone       String?
+  instagram   String?
+  categoryId  Int
+  category    Category     @relation(fields: [categoryId], references: [id])
+  images      Image[]
+  hours       OpeningHour[]
+  tags        VenueTag[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Image {
+  id      Int    @id @default(autoincrement())
+  url     String
+  alt     String
+  order   Int    @default(0)
+  venueId Int
+  venue   Venue  @relation(fields: [venueId], references: [id])
+}
+
+model OpeningHour {
+  id        Int    @id @default(autoincrement())
+  dayOfWeek Int
+  open      String
+  close     String
+  venueId   Int
+  venue     Venue  @relation(fields: [venueId], references: [id])
+}
+
+model Tag {
+  id     Int    @id @default(autoincrement())
+  slug   String @unique
+  name   String
+  venues VenueTag[]
+}
+
+model VenueTag {
+  venueId Int
+  tagId   Int
+  venue   Venue @relation(fields: [venueId], references: [id])
+  tag     Tag   @relation(fields: [tagId], references: [id])
+  @@id([venueId, tagId])
+}
